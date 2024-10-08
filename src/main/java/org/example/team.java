@@ -12,6 +12,13 @@ class Team {
 
     // Team 類別的構造函數，用於創建新的 Team 對象
     public Team(String name, String stadium, int capacity, double playoffFillRate, double worldSeriesFillRate) {
+        // 使用斷言確保參數有效性
+        assert name != null && !name.isEmpty() : "球隊名稱不能為空";
+        assert stadium != null && !stadium.isEmpty() : "球場名稱不能為空";
+        assert capacity > 0 : "球場容量必須大於0";
+        assert playoffFillRate >= 0 && playoffFillRate <= 1 : "季後賽上座率必須在0到1之間";
+        assert worldSeriesFillRate >= 0 && worldSeriesFillRate <= 1 : "世界大賽上座率必須在0到1之間";
+
         this.name = name;
         this.stadium = stadium;
         this.capacity = capacity;
@@ -31,23 +38,32 @@ class PostseasonRevenue {
     // 初始化球隊列表的方法
     private static List<Team> initializeTeams() {
         List<Team> teams = new ArrayList<>();
-        // 添加各支球隊，包括名稱、球場、容量、季後賽上座率和世界大賽上座率
-        teams.add(new Team("LAD 洛杉磯道奇", "Dodger Stadium 道奇體育場", 56000, 1.0, 1.0));
-        teams.add(new Team("SD 聖地牙哥教士", "Petco Park 沛可球場", 40000, 1.0, 1.0));
-        teams.add(new Team("MIL 密爾瓦基釀酒人", "American Family Field 美國家庭球場", 42000, 0.97, 1.0));
-        teams.add(new Team("NYM 紐約大都會", "Citi Field 花旗球場", 41800, 1.0, 1.0));
-        teams.add(new Team("ATL 亞特蘭大勇士", "Truist Park 信託公園", 41000, 1.0, 1.0));
-        teams.add(new Team("BAL 巴爾的摩金鶯", "Oriole Park 金鶯公園", 45000, 1.0, 1.0));
-        teams.add(new Team("NYY 紐約洋基", "Yankee Stadium 洋基體育場", 47000, 1.0, 1.0));
-        teams.add(new Team("CLE 克里夫蘭守護者", "Progressive Field 進步球場", 34800, 0.98, 1.0));
-        teams.add(new Team("HOU 休士頓太空人", "Minute Maid Park 美粒果棒球場", 41000, 1.0, 1.0));
-        teams.add(new Team("KS 堪薩斯市皇家", "Kauffman Stadium 考夫曼體育場", 37000, 1.0, 1.0));
-        teams.add(new Team("DET 底特律老虎隊", "Comerica Park 聯信球場", 41000, 1.0, 1.0));
+        try {
+            // 添加各支球隊，包括名稱、球場、容量、季後賽上座率和世界大賽上座率
+            teams.add(new Team("LAD 洛杉磯道奇", "Dodger Stadium 道奇體育場", 56000, 1.0, 1.0));
+            teams.add(new Team("SD 聖地牙哥教士", "Petco Park 沛可球場", 40000, 1.0, 1.0));
+            teams.add(new Team("MIL 密爾瓦基釀酒人", "American Family Field 美國家庭球場", 42000, 0.97, 1.0));
+            teams.add(new Team("NYM 紐約大都會", "Citi Field 花旗球場", 41800, 1.0, 1.0));
+            teams.add(new Team("ATL 亞特蘭大勇士", "Truist Park 信託公園", 41000, 1.0, 1.0));
+            teams.add(new Team("BAL 巴爾的摩金鶯", "Oriole Park 金鶯公園", 45000, 1.0, 1.0));
+            teams.add(new Team("NYY 紐約洋基", "Yankee Stadium 洋基體育場", 47000, 1.0, 1.0));
+            teams.add(new Team("CLE 克里夫蘭守護者", "Progressive Field 進步球場", 34800, 0.98, 1.0));
+            teams.add(new Team("HOU 休士頓太空人", "Minute Maid Park 美粒果棒球場", 41000, 1.0, 1.0));
+            teams.add(new Team("KS 堪薩斯市皇家", "Kauffman Stadium 考夫曼體育場", 37000, 1.0, 1.0));
+            teams.add(new Team("DET 底特律老虎隊", "Comerica Park 聯信球場", 41000, 1.0, 1.0));
+        } catch (AssertionError e) {
+            System.err.println("初始化球隊時發生錯誤: " + e.getMessage());
+        }
         return teams;
     }
 
     // 計算單支球隊收益的方法
-    private static double calculateRevenue(Team team, int playoffGames, int worldSeriesGames) {
+    private static double calculateRevenue(Team team, int playoffGames, int worldSeriesGames) throws IllegalArgumentException {
+        // 檢查參數有效性
+        if (playoffGames < 0 || worldSeriesGames < 0) {
+            throw new IllegalArgumentException("比賽場次不能為負數");
+        }
+
         // 計算季後賽收益
         double playoffRevenue = team.capacity * team.playoffFillRate * TICKET_PRICE_PLAYOFF * REVENUE_SHARE_AWAY * playoffGames;
         // 計算世界大賽收益
@@ -59,17 +75,21 @@ class PostseasonRevenue {
     // 計算並打印所有球隊收益的方法
     private static void calculateAndPrintRevenues(List<Team> teams) {
         for (Team team : teams) {
-            // 計算最差情況收益（在外卡系列賽中被淘汰）
-            double worstRevenue = calculateRevenue(team, 2, 0);
-            // 計算最佳情況收益（打到世界大賽第7場）
-            double bestRevenue = calculateRevenue(team, 12, 4);
+            try {
+                // 計算最差情況收益（在外卡系列賽中被淘汰）
+                double worstRevenue = calculateRevenue(team, 2, 0);
+                // 計算最佳情況收益（打到世界大賽第7場）
+                double bestRevenue = calculateRevenue(team, 12, 4);
 
-            // 打印球隊名稱
-            System.out.printf("Team: %s%n", team.name);
-            // 打印最差情況收益
-            System.out.printf("Worst scenario revenue: $%.2f (Eliminated in Wild Card Series)%n", worstRevenue);
-            // 打印最佳情況收益
-            System.out.printf("Best scenario revenue: $%.2f (Reaches World Series Game 7)%n%n", bestRevenue);
+                // 打印球隊名稱
+                System.out.printf("Team: %s%n", team.name);
+                // 打印最差情況收益
+                System.out.printf("Worst scenario revenue: $%.2f (Eliminated in Wild Card Series)%n", worstRevenue);
+                // 打印最佳情況收益
+                System.out.printf("Best scenario revenue: $%.2f (Reaches World Series Game 7)%n%n", bestRevenue);
+            } catch (IllegalArgumentException e) {
+                System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
+            }
         }
     }
 

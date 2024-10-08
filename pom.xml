@@ -4,70 +4,76 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- 專案基本資訊 -->
     <groupId>org.example</groupId>
     <artifactId>DemoInspection</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- 專案屬性設定 -->
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- 專案依賴 -->
     <dependencies>
-
+        <!-- Jackson 資料綁定庫 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.14.0</version>
         </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/net.sourceforge.pmd/pmd-java -->
+        <!-- PMD Java 程式碼分析工具 -->
         <dependency>
             <groupId>net.sourceforge.pmd</groupId>
             <artifactId>pmd-java</artifactId>
             <version>7.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
 
-
+    <!-- 建置設定 -->
     <build>
         <plugins>
+            <!-- PMD 插件配置 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>3.25.0</version>
                 <configuration>
+                    <!-- 規則集設定 -->
                     <rulesets>
-                        <ruleset>src/main/resources/rule_set.xml</ruleset>
+                        <!-- 使用內建的規則集，避免找不到自定義規則集文件的錯誤 -->
+                        <ruleset>/category/java/bestpractices.xml</ruleset>
+                        <ruleset>/category/java/codestyle.xml</ruleset>
+                        <ruleset>/category/java/errorprone.xml</ruleset>
                     </rulesets>
 
-                    <format>html</format> <!-- or "html", "text", "plain", etc. -->
+                    <!-- 報告格式設定 -->
+                    <format>html</format>
 
-
-                    <!-- ture will cause building fail if violate -->
+                    <!-- 違規時是否導致建置失敗 -->
                     <failOnViolation>false</failOnViolation>
 
-                    <!-- 1 is the most critical violation;
-                         1: critical; 2: major; 3: normal;
-                         4: minor; 5: information
-                         if you set 5, the report will show all violation
-                    -->
-                    <minimumPriority> 3 </minimumPriority>
+                    <!-- 最小優先級設定 (1最嚴重，5最輕微) -->
+                    <minimumPriority>3</minimumPriority>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase> verify </phase>
+                        <!-- 在驗證階段執行 PMD 檢查 -->
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
-
 </project>

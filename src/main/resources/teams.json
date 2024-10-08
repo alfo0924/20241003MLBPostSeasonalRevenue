@@ -1,0 +1,79 @@
+[
+  {
+    "name": "LAD 洛杉磯道奇",
+    "stadium": "Dodger Stadium 道奇體育場",
+    "capacity": 56000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "SD 聖地牙哥教士",
+    "stadium": "Petco Park 沛可球場",
+    "capacity": 40000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "MIL 密爾瓦基釀酒人",
+    "stadium": "American Family Field 美國家庭球場",
+    "capacity": 42000,
+    "playoffFillRate": 0.97,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "NYM 紐約大都會",
+    "stadium": "Citi Field 花旗球場",
+    "capacity": 41800,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "ATL 亞特蘭大勇士",
+    "stadium": "Truist Park 信託公園",
+    "capacity": 41000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "BAL 巴爾的摩金鶯",
+    "stadium": "Oriole Park 金鶯公園",
+    "capacity": 45000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "NYY 紐約洋基",
+    "stadium": "Yankee Stadium 洋基體育場",
+    "capacity": 47000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "CLE 克里夫蘭守護者",
+    "stadium": "Progressive Field 進步球場",
+    "capacity": 34800,
+    "playoffFillRate": 0.98,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "HOU 休士頓太空人",
+    "stadium": "Minute Maid Park 美粒果棒球場",
+    "capacity": 41000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "KS 堪薩斯市皇家",
+    "stadium": "Kauffman Stadium 考夫曼體育場",
+    "capacity": 37000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  },
+  {
+    "name": "DET 底特律老虎隊",
+    "stadium": "Comerica Park 聯信球場",
+    "capacity": 41000,
+    "playoffFillRate": 1.0,
+    "worldSeriesFillRate": 1.0
+  }
+]
