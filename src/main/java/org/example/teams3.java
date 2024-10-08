@@ -126,9 +126,9 @@ class PostseasonRevenue3 {
                 double worstRevenue = calculateRevenue(team, playoffWorstGames, worldSeriesWorstGames);
                 double bestRevenue = calculateRevenue(team, playoffBestGames, worldSeriesBestGames);
 
-                System.out.printf("Team: %s%n", team.name);
-                System.out.printf("Worst scenario revenue: $%.2f (Eliminated in Wild Card Series)%n", worstRevenue);
-                System.out.printf("Best scenario revenue: $%.2f (Reaches World Series Game 7)%n%n", bestRevenue);
+                System.out.printf("Team 隊伍 : %s%n", team.name);
+                System.out.printf("Worst scenario revenue 最遭收益 : $%.2f 美元 (Eliminated in Wild Card Series 在外卡賽淘汰 )%n", worstRevenue);
+                System.out.printf("Best scenario revenue 最好收益 : $%.2f 美元 (Reaches World Series Game 7 贏得世界杯 )%n%n", bestRevenue);
             } catch (IllegalArgumentException e) {
                 System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
             }
