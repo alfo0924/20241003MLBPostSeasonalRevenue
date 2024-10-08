@@ -10,7 +10,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.Properties;
 
-// 定義 Team 類別，用於表示一支棒球隊伍
 class Team3 {
     String name;
     String stadium;
@@ -19,7 +18,6 @@ class Team3 {
     double worldSeriesFillRate;
 
     public Team3(String name, String stadium, int capacity, double playoffFillRate, double worldSeriesFillRate) {
-        // 使用斷言確保參數有效性
         assert name != null && !name.isEmpty() : "球隊名稱不能為空";
         assert stadium != null && !stadium.isEmpty() : "球場名稱不能為空";
         assert capacity > 0 : "球場容量必須大於0";
@@ -34,28 +32,18 @@ class Team3 {
     }
 }
 
-// 定義 PostseasonRevenue 類別，用於計算季後賽收益
 class PostseasonRevenue3 {
     private final double ticketPricePlayoff;
     private final double ticketPriceWorldSeries;
     private final double revenueShareHome;
     private final double revenueShareAway;
-    private final int playoffWorstGames;
-    private final int playoffBestGames;
-    private final int worldSeriesWorstGames;
-    private final int worldSeriesBestGames;
 
     public PostseasonRevenue3(Properties props) throws IllegalArgumentException {
         this.ticketPricePlayoff = getDoubleProperty(props, "ticket.price.playoff", 450);
         this.ticketPriceWorldSeries = getDoubleProperty(props, "ticket.price.worldseries", 800);
         this.revenueShareHome = getDoubleProperty(props, "revenue.share.home", 0.85);
         this.revenueShareAway = getDoubleProperty(props, "revenue.share.away", 0.15);
-        this.playoffWorstGames = getIntProperty(props, "games.playoff.worst", 2);
-        this.playoffBestGames = getIntProperty(props, "games.playoff.best", 12);
-        this.worldSeriesWorstGames = getIntProperty(props, "games.worldseries.worst", 0);
-        this.worldSeriesBestGames = getIntProperty(props, "games.worldseries.best", 4);
 
-        // 驗證收益分配比例總和為1
         if (Math.abs(this.revenueShareHome + this.revenueShareAway - 1.0) > 0.000001) {
             throw new IllegalArgumentException("收益分配比例總和必須為1");
         }
@@ -73,19 +61,6 @@ class PostseasonRevenue3 {
         }
     }
 
-    private int getIntProperty(Properties props, String key, int defaultValue) throws IllegalArgumentException {
-        String value = props.getProperty(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("無效的整數設定: " + key);
-        }
-    }
-
-    // 從 JSON 文件讀取球隊數據
     private static List<Team3> readTeamsFromJson(String filename) throws IOException, ParseException {
         List<Team3> teams = new ArrayList<>();
         JSONParser parser = new JSONParser();
@@ -108,53 +83,66 @@ class PostseasonRevenue3 {
         return teams;
     }
 
-    // 計算單支球隊收益的方法
-    private double calculateRevenue(Team3 team, int playoffGames, int worldSeriesGames) throws IllegalArgumentException {
-        if (playoffGames < 0 || worldSeriesGames < 0) {
+    private double calculateRevenue(Team3 team, int homeGames, int awayGames, boolean isWorldSeries) {
+        if (homeGames < 0 || awayGames < 0) {
             throw new IllegalArgumentException("比賽場次不能為負數");
         }
 
-        double playoffRevenue = team.capacity * team.playoffFillRate * ticketPricePlayoff * revenueShareAway * playoffGames;
-        double worldSeriesRevenue = team.capacity * team.worldSeriesFillRate * ticketPriceWorldSeries * revenueShareAway * worldSeriesGames;
-        return playoffRevenue + worldSeriesRevenue;
+        double ticketPrice = isWorldSeries ? ticketPriceWorldSeries : ticketPricePlayoff;
+        double fillRate = isWorldSeries ? team.worldSeriesFillRate : team.playoffFillRate;
+
+        double homeRevenue = team.capacity * fillRate * ticketPrice * revenueShareHome * homeGames;
+        double awayRevenue = team.capacity * fillRate * ticketPrice * revenueShareAway * awayGames;
+
+        return homeRevenue + awayRevenue;
     }
 
-    // 計算並打印所有球隊收益的方法
     public void calculateAndPrintRevenues(List<Team3> teams) {
         for (Team3 team : teams) {
             try {
-                double worstRevenue = calculateRevenue(team, playoffWorstGames, worldSeriesWorstGames);
-                double bestRevenue = calculateRevenue(team, playoffBestGames, worldSeriesBestGames);
+                // 最差情況：在外卡賽被淘汰（客場2場）
+                double worstRevenue = calculateRevenue(team, 0, 2, false);
 
-                System.out.printf("Team 隊伍 : %s%n", team.name);
-                System.out.printf("Worst scenario revenue 最遭收益 : $%.2f 美元 (Eliminated in Wild Card Series 在外卡賽淘汰 )%n", worstRevenue);
-                System.out.printf("Best scenario revenue 最好收益 : $%.2f 美元 (Reaches World Series Game 7 贏得世界杯 )%n%n", bestRevenue);
+                // 最好情況：打到世界大賽第7場（假設是較低種子，主場3場，客場4場）
+                double bestRevenue = calculateRevenue(team, 2, 1, false) + // 外卡賽
+                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
+                        calculateRevenue(team, 3, 4, false) + // 聯盟冠軍賽
+                        calculateRevenue(team, 3, 4, true);   // 世界大賽
+
+                // 其他情境
+                double eliminatedInDivisionSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
+                        calculateRevenue(team, 0, 3, false);  // 分區系列賽
+
+                double eliminatedInChampionshipSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
+                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
+                        calculateRevenue(team, 0, 4, false);  // 聯盟冠軍賽
+
+                System.out.printf("%nTeam 隊伍: %s%n", team.name);
+                System.out.printf("Eliminated in Division Series 在分區系列賽淘汰 : $%.2f 美元%n", eliminatedInDivisionSeries);
+                System.out.printf("Eliminated in Wild Card Series 在外卡賽淘汰 : $%.2f 美元%n", worstRevenue);
+                System.out.printf("Eliminated in Championship Series 在聯盟冠軍賽淘汰 : $%.2f 美元%n", eliminatedInChampionshipSeries);
+                System.out.printf("Reaches World Series Game 7 打到世界大賽第7場 : $%.2f 美元 %n%n", bestRevenue);
             } catch (IllegalArgumentException e) {
                 System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
             }
         }
     }
 
-    // 主方法
     public static void main(String[] args) {
         try {
-            // 讀取配置文件
             Properties props = new Properties();
-            try (InputStream input = PostseasonRevenue2.class.getClassLoader().getResourceAsStream("config.properties")) {
+            try (InputStream input = PostseasonRevenue3.class.getClassLoader().getResourceAsStream("config.properties")) {
                 if (input == null) {
                     throw new IOException("無法找到 config.properties 文件");
                 }
                 props.load(input);
             }
 
-            // 初始化 PostseasonRevenue 對象
             PostseasonRevenue3 revenue = new PostseasonRevenue3(props);
 
-            // 從 JSON 文件讀取球隊數據
             String jsonPath = props.getProperty("teams.json.path", "src/main/resources/teams.json");
             List<Team3> teams = readTeamsFromJson(jsonPath);
 
-            // 計算並打印所有球隊的收益
             revenue.calculateAndPrintRevenues(teams);
         } catch (IOException e) {
             System.err.println("讀取文件時發生錯誤: " + e.getMessage());
