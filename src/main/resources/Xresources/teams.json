@@ -1,10 +1,10 @@
 [
   {
-    "name": "LAD 洛杉磯道奇",
-    "stadium": "Dodger Stadium 道奇體育場",
-    "capacity": 56000,
-    "playoffFillRate": 1.0,
-    "worldSeriesFillRate": 1.0
+    "name": "",
+    "stadium": "",
+    "capacity": -56000,
+    "playoffFillRate": 1.4,
+    "worldSeriesFillRate": -1.0
   },
   {
     "name": "SD 聖地牙哥教士",
