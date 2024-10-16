@@ -12,24 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-// 定義 Team3 類別，用於表示一支棒球隊伍
 class Team3 {
-    String name;        // 球隊名稱
-    String stadium;     // 球場名稱
-    int capacity;       // 球場容量
-    double playoffFillRate;     // 季後賽上座率
-    double worldSeriesFillRate; // 世界大賽上座率
+    String name;
+    String stadium;
+    int capacity;
+    double playoffFillRate;
+    double worldSeriesFillRate;
 
-    // Team3 類別的建構函數
     public Team3(String name, String stadium, int capacity, double playoffFillRate, double worldSeriesFillRate) {
-        // 使用斷言確保輸入參數的有效性
         assert name != null && !name.isEmpty() : "球隊名稱不能為空";
         assert stadium != null && !stadium.isEmpty() : "球場名稱不能為空";
         assert capacity > 0 : "球場容量必須大於0";
         assert playoffFillRate >= 0 && playoffFillRate <= 1 : "季後賽上座率必須在0到1之間";
         assert worldSeriesFillRate >= 0 && worldSeriesFillRate <= 1 : "世界大賽上座率必須在0到1之間";
 
-        // 初始化物件屬性
         this.name = name;
         this.stadium = stadium;
         this.capacity = capacity;
@@ -38,28 +34,23 @@ class Team3 {
     }
 }
 
-// 定義 PostseasonRevenue3 類別，用於計算季後賽收益
 class PostseasonRevenue3 {
-    private final double ticketPricePlayoff;     // 季後賽票價
-    private final double ticketPriceWorldSeries; // 世界大賽票價
-    private final double revenueShareHome;       // 主場收益分成比例
-    private final double revenueShareAway;       // 客場收益分成比例
+    private final double ticketPricePlayoff;
+    private final double ticketPriceWorldSeries;
+    private final double revenueShareHome;
+    private final double revenueShareAway;
 
-    // PostseasonRevenue3 類別的建構函數
     public PostseasonRevenue3(Properties props) throws IllegalArgumentException {
-        // 從配置檔案讀取各項參數，如果沒有設定則使用預設值
         this.ticketPricePlayoff = getDoubleProperty(props, "ticket.price.playoff", 450);
         this.ticketPriceWorldSeries = getDoubleProperty(props, "ticket.price.worldseries", 800);
         this.revenueShareHome = getDoubleProperty(props, "revenue.share.home", 0.85);
         this.revenueShareAway = getDoubleProperty(props, "revenue.share.away", 0.15);
 
-        // 驗證收益分配比例總和是否為1
         if (Math.abs(this.revenueShareHome + this.revenueShareAway - 1.0) > 0.000001) {
             throw new IllegalArgumentException("收益分配比例總和必須為1");
         }
     }
 
-    // 從 Properties 物件中讀取 double 類型的屬性值
     private double getDoubleProperty(Properties props, String key, double defaultValue) throws IllegalArgumentException {
         String value = props.getProperty(key);
         if (value == null) {
@@ -72,7 +63,6 @@ class PostseasonRevenue3 {
         }
     }
 
-    // 從 JSON 文件讀取球隊數據
     private static List<Team3> readTeamsFromJson(String filename) throws IOException, ParseException {
         List<Team3> teams = new ArrayList<>();
         JSONParser parser = new JSONParser();
@@ -95,62 +85,59 @@ class PostseasonRevenue3 {
         return teams;
     }
 
-    // 計算單支球隊在特定情況下的收益
-    private double calculateRevenue(Team3 team, int homeGames, int awayGames, boolean isWorldSeries) {
-        if (homeGames < 0 || awayGames < 0) {
-            throw new IllegalArgumentException("比賽場次不能為負數");
-        }
-
-        // 根據是否為世界大賽決定使用的票價和上座率
+    private double calculateHomeRevenue(Team3 team, int games, boolean isWorldSeries) {
         double ticketPrice = isWorldSeries ? ticketPriceWorldSeries : ticketPricePlayoff;
         double fillRate = isWorldSeries ? team.worldSeriesFillRate : team.playoffFillRate;
-
-        // 計算主場和客場收益
-        double homeRevenue = team.capacity * fillRate * ticketPrice * revenueShareHome * homeGames;
-        double awayRevenue = team.capacity * fillRate * ticketPrice * revenueShareAway * awayGames;
-
-        return homeRevenue + awayRevenue;
+        return team.capacity * fillRate * ticketPrice * revenueShareHome * games;
     }
 
-    // 計算並打印所有球隊的收益情況
+    private double calculateAwayRevenue(Team3 team, int games, boolean isWorldSeries) {
+        double ticketPrice = isWorldSeries ? ticketPriceWorldSeries : ticketPricePlayoff;
+        double fillRate = isWorldSeries ? team.worldSeriesFillRate : team.playoffFillRate;
+        return team.capacity * fillRate * ticketPrice * revenueShareAway * games;
+    }
+
     public void calculateAndPrintRevenues(List<Team3> teams) {
         for (Team3 team : teams) {
             try {
-                // 計算最差情況：在外卡賽被淘汰（客場2場）
-                double worstRevenue = calculateRevenue(team, 0, 2, false);
+                // 主場收益計算
+                double homeWorstRevenue = calculateHomeRevenue(team, 1, false); // 外卡賽至少1場主場
+                double homeDivisionRevenue = calculateHomeRevenue(team, 2, false);
+                double homeChampionshipRevenue = calculateHomeRevenue(team, 4, false);
+                double homeWorldSeriesLossRevenue = calculateHomeRevenue(team, 4, false) + calculateHomeRevenue(team, 2, true);
+                double homeWorldSeriesWinRevenue = calculateHomeRevenue(team, 4, false) + calculateHomeRevenue(team, 3, true);
 
-                // 計算最好情況：打到世界大賽第7場（假設是較低種子，主場3場，客場4場）
-                double bestRevenue = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
-                        calculateRevenue(team, 3, 4, false) + // 聯盟冠軍賽
-                        calculateRevenue(team, 3, 4, true);   // 世界大賽
-
-                // 計算其他情境
-                // 在分區系列賽被淘汰
-                double eliminatedInDivisionSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 0, 3, false);  // 分區系列賽
-
-                // 在聯盟冠軍賽被淘汰
-                double eliminatedInChampionshipSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
-                        calculateRevenue(team, 0, 4, false);  // 聯盟冠軍賽
+                // 客場收益計算
+                double awayWorstRevenue = calculateAwayRevenue(team, 2, false);
+                double awayDivisionRevenue = calculateAwayRevenue(team, 3, false);
+                double awayChampionshipRevenue = calculateAwayRevenue(team, 6, false);
+                double awayWorldSeriesLossRevenue = calculateAwayRevenue(team, 6, false) + calculateAwayRevenue(team, 2, true);
+                double awayWorldSeriesWinRevenue = calculateAwayRevenue(team, 6, false) + calculateAwayRevenue(team, 3, true);
 
                 // 打印結果
                 System.out.printf("%nTeam 隊伍: %s%n", team.name);
-                System.out.printf("Eliminated in Division Series 在分區系列賽淘汰 : $%.2f 美元%n", eliminatedInDivisionSeries);
-                System.out.printf("Eliminated in Wild Card Series 在外卡賽淘汰 : $%.2f 美元%n", worstRevenue);
-                System.out.printf("Eliminated in Championship Series 在聯盟冠軍賽淘汰 : $%.2f 美元%n", eliminatedInChampionshipSeries);
-                System.out.printf("Reaches World Series Game 7 打到世界大賽第7場 : $%.2f 美元 %n%n", bestRevenue);
+                System.out.println("主場收益範圍:");
+                System.out.printf("  最差情況（外卡賽1場主場）: $%.2f%n", homeWorstRevenue);
+                System.out.printf("  分區系列賽被淘汰: $%.2f%n", homeDivisionRevenue);
+                System.out.printf("  聯盟冠軍賽被淘汰: $%.2f%n", homeChampionshipRevenue);
+                System.out.printf("  打入世界大賽但輸掉: $%.2f%n", homeWorldSeriesLossRevenue);
+                System.out.printf("  贏得世界大賽: $%.2f%n", homeWorldSeriesWinRevenue);
+
+                System.out.println("客場收益範圍:");
+                System.out.printf("  最差情況（外卡賽被淘汰）: $%.2f%n", awayWorstRevenue);
+                System.out.printf("  分區系列賽被淘汰: $%.2f%n", awayDivisionRevenue);
+                System.out.printf("  聯盟冠軍賽被淘汰: $%.2f%n", awayChampionshipRevenue);
+                System.out.printf("  打入世界大賽但輸掉: $%.2f%n", awayWorldSeriesLossRevenue);
+                System.out.printf("  贏得世界大賽: $%.2f%n", awayWorldSeriesWinRevenue);
+
             } catch (IllegalArgumentException e) {
                 System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
             }
         }
     }
 
-    // 主方法
     public static void main(String[] args) {
         try {
-            // 讀取配置文件
             Properties props = new Properties();
             try (InputStream input = PostseasonRevenue3.class.getClassLoader().getResourceAsStream("config.properties")) {
                 if (input == null) {
@@ -159,14 +146,11 @@ class PostseasonRevenue3 {
                 props.load(input);
             }
 
-            // 創建 PostseasonRevenue3 物件
             PostseasonRevenue3 revenue = new PostseasonRevenue3(props);
 
-            // 從 JSON 文件讀取球隊數據
             String jsonPath = props.getProperty("teams.json.path", "src/main/resources/teams.json");
             List<Team3> teams = readTeamsFromJson(jsonPath);
 
-            // 計算並打印所有球隊的收益
             revenue.calculateAndPrintRevenues(teams);
         } catch (IOException e) {
             System.err.println("讀取文件時發生錯誤: " + e.getMessage());
