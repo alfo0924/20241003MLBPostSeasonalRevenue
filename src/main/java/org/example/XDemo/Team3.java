@@ -114,31 +114,36 @@ class PostseasonRevenue3 {
     public void calculateAndPrintRevenues(List<Team3> teams) {
         for (Team3 team : teams) {
             try {
-                // 計算最差情況：在外卡賽被淘汰（客場2場）
-                double worstRevenue = calculateRevenue(team, 0, 2, false);
+                // 計算主場收益
+                double homeWorstRevenue = calculateRevenue(team, 1, 0, false); // 外卡賽1場主場
+                double homeDivisionRevenue = calculateRevenue(team, 2, 0, false); // 分區系列賽2場主場
+                double homeChampionshipRevenue = calculateRevenue(team, 4, 0, false); // 聯盟冠軍賽4場主場
+                double homeWorldSeriesLossRevenue = calculateRevenue(team, 4, 0, false) + calculateRevenue(team, 2, 0, true); // 世界大賽輸球2場主場
+                double homeWorldSeriesWinRevenue = calculateRevenue(team, 4, 0, false) + calculateRevenue(team, 3, 0, true); // 世界大賽贏球3場主場
 
-                // 計算最好情況：打到世界大賽第7場（假設是較低種子，主場3場，客場4場）
-                double bestRevenue = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
-                        calculateRevenue(team, 3, 4, false) + // 聯盟冠軍賽
-                        calculateRevenue(team, 3, 4, true);   // 世界大賽
-
-                // 計算其他情境
-                // 在分區系列賽被淘汰
-                double eliminatedInDivisionSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 0, 3, false);  // 分區系列賽
-
-                // 在聯盟冠軍賽被淘汰
-                double eliminatedInChampionshipSeries = calculateRevenue(team, 2, 1, false) + // 外卡賽
-                        calculateRevenue(team, 2, 3, false) + // 分區系列賽
-                        calculateRevenue(team, 0, 4, false);  // 聯盟冠軍賽
+                // 計算客場收益
+                double awayWorstRevenue = calculateRevenue(team, 0, 2, false); // 外卡賽2場客場
+                double awayDivisionRevenue = calculateRevenue(team, 0, 3, false); // 分區系列賽3場客場
+                double awayChampionshipRevenue = calculateRevenue(team, 0, 3, false) + calculateRevenue(team, 0, 3, false); // 聯盟冠軍賽3場客場
+                double awayWorldSeriesLossRevenue = awayChampionshipRevenue + calculateRevenue(team, 0, 2, true); // 世界大賽輸球2場客場
+                double awayWorldSeriesWinRevenue = awayChampionshipRevenue + calculateRevenue(team, 0, 3, true); // 世界大賽贏球3場客場
 
                 // 打印結果
                 System.out.printf("%nTeam 隊伍: %s%n", team.name);
-                System.out.printf("Eliminated in Division Series 在分區系列賽淘汰 : $%.2f 美元%n", eliminatedInDivisionSeries);
-                System.out.printf("Eliminated in Wild Card Series 在外卡賽淘汰 : $%.2f 美元%n", worstRevenue);
-                System.out.printf("Eliminated in Championship Series 在聯盟冠軍賽淘汰 : $%.2f 美元%n", eliminatedInChampionshipSeries);
-                System.out.printf("Reaches World Series Game 7 打到世界大賽第7場 : $%.2f 美元 %n%n", bestRevenue);
+                System.out.println("主場收益範圍:");
+                System.out.printf("  最差情況（外卡賽1場主場）: $%.2f%n", homeWorstRevenue);
+                System.out.printf("  分區系列賽被淘汰: $%.2f%n", homeDivisionRevenue);
+                System.out.printf("  聯盟冠軍賽被淘汰: $%.2f%n", homeChampionshipRevenue);
+                System.out.printf("  打入世界大賽但輸掉: $%.2f%n", homeWorldSeriesLossRevenue);
+                System.out.printf("  贏得世界大賽: $%.2f%n", homeWorldSeriesWinRevenue);
+
+                System.out.println("客場收益範圍:");
+                System.out.printf("  最差情況（外卡賽被淘汰）: $%.2f%n", awayWorstRevenue);
+                System.out.printf("  分區系列賽被淘汰: $%.2f%n", awayDivisionRevenue);
+                System.out.printf("  聯盟冠軍賽被淘汰: $%.2f%n", awayChampionshipRevenue);
+                System.out.printf("  打入世界大賽但輸掉: $%.2f%n", awayWorldSeriesLossRevenue);
+                System.out.printf("  贏得世界大賽: $%.2f%n", awayWorldSeriesWinRevenue);
+
             } catch (IllegalArgumentException e) {
                 System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
             }
