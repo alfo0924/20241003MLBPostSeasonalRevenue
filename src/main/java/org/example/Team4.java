@@ -96,46 +96,52 @@ class PostseasonRevenue4 {
         double fillRate = isWorldSeries ? team.worldSeriesFillRate : team.playoffFillRate;
         return team.capacity * fillRate * ticketPrice * revenueShareAway * games;
     }
-
     public void calculateAndPrintRevenues(List<Team4> teams) {
         for (Team4 team : teams) {
             try {
-                // 主場收益計算
-                double homeWildCardRevenue = calculateHomeRevenue(team, 3, false);
-                double homeDivisionRevenue = homeWildCardRevenue + calculateHomeRevenue(team, 3, false);
-                double homeChampionshipRevenue = homeDivisionRevenue + calculateHomeRevenue(team, 4, false);
-                double homeWorldSeriesLossRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 3, true); // 輸球最多3場主場
-                double homeWorldSeriesWinRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 4, true);  // 贏球最多4場主場
+                // 外卡賽收益計算
+                double homeWildCardWin = calculateHomeRevenue(team, 2, false);
+                double awayWildCardWin = calculateAwayRevenue(team, 2, false);
+                double homeWildCardLoss = calculateHomeRevenue(team, 1, false);
+                double awayWildCardLoss = calculateAwayRevenue(team, 1, false);
 
-                // 客場收益計算
-                double awayWildCardRevenue = 0; // 外卡賽沒有客場比賽
-                double awayDivisionRevenue = awayWildCardRevenue + calculateAwayRevenue(team, 2, false);
-                double awayChampionshipRevenue = awayDivisionRevenue + calculateAwayRevenue(team, 3, false);
-                double awayWorldSeriesLossRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 3, true); // 輸球最多3場客場
-                double awayWorldSeriesWinRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 4, true);  // 贏球最多4場客場
+                // 分區系列賽收益計算
+                double homeDivisionWin = homeWildCardWin + calculateHomeRevenue(team, 3, false);
+                double awayDivisionWin = awayWildCardWin + calculateAwayRevenue(team, 2, false);
+                double homeDivisionLoss = homeWildCardWin + calculateHomeRevenue(team, 2, false);
+                double awayDivisionLoss = awayWildCardWin + calculateAwayRevenue(team, 1, false);
+
+                // 聯盟冠軍賽收益計算
+                double homeChampionshipWin = homeDivisionWin + calculateHomeRevenue(team, 4, false);
+                double awayChampionshipWin = awayDivisionWin + calculateAwayRevenue(team, 3, false);
+                double homeChampionshipLoss = homeDivisionWin + calculateHomeRevenue(team, 3, false);
+                double awayChampionshipLoss = awayDivisionWin + calculateAwayRevenue(team, 2, false);
+
+                // 世界大賽收益計算
+                double homeWorldSeriesWin = homeChampionshipWin + calculateHomeRevenue(team, 4, true);
+                double awayWorldSeriesWin = awayChampionshipWin + calculateAwayRevenue(team, 3, true);
+                double homeWorldSeriesLoss = homeChampionshipWin + calculateHomeRevenue(team, 3, true);
+                double awayWorldSeriesLoss = awayChampionshipWin + calculateAwayRevenue(team, 2, true);
 
                 // 打印結果
                 System.out.printf("%nTeam 隊伍: %s%n", team.name);
                 System.out.println("主場累積收益:");
-                System.out.printf("  外卡賽: $%.2f%n", homeWildCardRevenue);
-                System.out.printf("  分區系列賽: $%.2f%n", homeDivisionRevenue);
-                System.out.printf("  聯盟冠軍賽: $%.2f%n", homeChampionshipRevenue);
-                System.out.printf("  世界大賽（輸）: $%.2f%n", homeWorldSeriesLossRevenue);
-                System.out.printf("  世界大賽（贏）: $%.2f%n", homeWorldSeriesWinRevenue);
+                System.out.printf("  外卡賽 (贏): $%.2f, (輸): $%.2f%n", homeWildCardWin, homeWildCardLoss);
+                System.out.printf("  分區系列賽 (贏): $%.2f, (輸): $%.2f%n", homeDivisionWin, homeDivisionLoss);
+                System.out.printf("  聯盟冠軍賽 (贏): $%.2f, (輸): $%.2f%n", homeChampionshipWin, homeChampionshipLoss);
+                System.out.printf("  世界大賽 (贏): $%.2f, (輸): $%.2f%n", homeWorldSeriesWin, homeWorldSeriesLoss);
 
                 System.out.println("客場累積收益:");
-                System.out.printf("  外卡賽: $%.2f%n", awayWildCardRevenue);
-                System.out.printf("  分區系列賽: $%.2f%n", awayDivisionRevenue);
-                System.out.printf("  聯盟冠軍賽: $%.2f%n", awayChampionshipRevenue);
-                System.out.printf("  世界大賽（輸）: $%.2f%n", awayWorldSeriesLossRevenue);
-                System.out.printf("  世界大賽（贏）: $%.2f%n", awayWorldSeriesWinRevenue);
+                System.out.printf("  外卡賽 (贏): $%.2f, (輸): $%.2f%n", awayWildCardWin, awayWildCardLoss);
+                System.out.printf("  分區系列賽 (贏): $%.2f, (輸): $%.2f%n", awayDivisionWin, awayDivisionLoss);
+                System.out.printf("  聯盟冠軍賽 (贏): $%.2f, (輸): $%.2f%n", awayChampionshipWin, awayChampionshipLoss);
+                System.out.printf("  世界大賽 (贏): $%.2f, (輸): $%.2f%n", awayWorldSeriesWin, awayWorldSeriesLoss);
 
             } catch (IllegalArgumentException e) {
                 System.err.println("計算 " + team.name + " 的收益時發生錯誤: " + e.getMessage());
             }
         }
     }
-
     public static void main(String[] args) {
         try {
             Properties props = new Properties();
