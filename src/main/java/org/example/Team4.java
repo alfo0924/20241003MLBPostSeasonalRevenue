@@ -104,15 +104,15 @@ class PostseasonRevenue4 {
                 double homeWildCardRevenue = calculateHomeRevenue(team, 3, false);
                 double homeDivisionRevenue = homeWildCardRevenue + calculateHomeRevenue(team, 3, false);
                 double homeChampionshipRevenue = homeDivisionRevenue + calculateHomeRevenue(team, 4, false);
-                double homeWorldSeriesLossRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 4, true);
-                double homeWorldSeriesWinRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 4, true);
+                double homeWorldSeriesLossRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 3, true); // 輸球最多3場主場
+                double homeWorldSeriesWinRevenue = homeChampionshipRevenue + calculateHomeRevenue(team, 4, true);  // 贏球最多4場主場
 
                 // 客場收益計算
                 double awayWildCardRevenue = 0; // 外卡賽沒有客場比賽
                 double awayDivisionRevenue = awayWildCardRevenue + calculateAwayRevenue(team, 2, false);
                 double awayChampionshipRevenue = awayDivisionRevenue + calculateAwayRevenue(team, 3, false);
-                double awayWorldSeriesLossRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 3, true);
-                double awayWorldSeriesWinRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 3, true);
+                double awayWorldSeriesLossRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 3, true); // 輸球最多3場客場
+                double awayWorldSeriesWinRevenue = awayChampionshipRevenue + calculateAwayRevenue(team, 4, true);  // 贏球最多4場客場
 
                 // 打印結果
                 System.out.printf("%nTeam 隊伍: %s%n", team.name);
