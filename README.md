@@ -329,10 +329,10 @@ class PostseasonRevenue3 {
 - 上座率必須在0到1之間
 ```
 
-### PostseasonRevenue3 類別
+### PostseasonRevenue4 類別
 
 ```markdown
-## PostseasonRevenue3 類別
+## PostseasonRevenue4 類別
 
 這個類別負責計算季後賽的收益。
 
